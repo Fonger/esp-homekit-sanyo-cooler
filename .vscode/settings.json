@@ -21,7 +21,8 @@
     "esp_wifi.h": "c",
     "esp8266.h": "c",
     "stddef.h": "c",
-    "portable.h": "c"
+    "portable.h": "c",
+    "system_error": "c"
   },
   "files.exclude": {
     "**/.git": true,

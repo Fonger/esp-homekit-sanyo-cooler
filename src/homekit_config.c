@@ -4,13 +4,12 @@
 
 #include "homekit_callback.h"
 #include "homekit_config.h"
+#include "ir.h"
 
-ac_state_t AC = {.active = false,
-                 .rotationSpeed = 1,
-                 .swing = false,
-                 .targetTemperature = DEFAULT_COOLER_TEMPERATURE,
-                 .lastTargetTempChange = 0};
-fan_state_t FAN = {.active = false, .rotationSpeed = 1};
+ac_state_t AC = {.target_temperature = 22,
+                 .mode = ac_mode_cooler,
+                 .fan = ac_fan_med,
+                 .active = false};
 
 bool homekit_initialized = false;
 
@@ -40,16 +39,7 @@ homekit_characteristic_t target_heater_cooler_state =
 homekit_characteristic_t ac_active = HOMEKIT_CHARACTERISTIC_(
   ACTIVE, 0, .getter = ac_active_get, .setter = ac_active_set);
 homekit_characteristic_t ac_rotation_speed = HOMEKIT_CHARACTERISTIC_(
-  ROTATION_SPEED, 1, .min_value = (float[]){0}, .max_value = (float[]){3},
-  .getter = ac_speed_get, .setter = ac_speed_set);
-homekit_characteristic_t ac_swing_mode = HOMEKIT_CHARACTERISTIC_(
-  SWING_MODE, 0, .getter = ac_swing_get, .setter = ac_swing_set);
-
-homekit_characteristic_t fan_active = HOMEKIT_CHARACTERISTIC_(
-  ACTIVE, 0, .getter = fan_active_get, .setter = fan_active_set);
-homekit_characteristic_t fan_rotation_speed = HOMEKIT_CHARACTERISTIC_(
-  ROTATION_SPEED, 1, .min_value = (float[]){0}, .max_value = (float[]){3},
-  .getter = fan_speed_get, .setter = fan_speed_set);
+  ROTATION_SPEED, 0, .getter = ac_speed_get, .setter = ac_speed_set);
 
 homekit_accessory_t *homekit_accessories[] = {
   HOMEKIT_ACCESSORY(
@@ -60,11 +50,11 @@ homekit_accessory_t *homekit_accessories[] = {
             ACCESSORY_INFORMATION,
             .characteristics =
               (homekit_characteristic_t *[]){
-                HOMEKIT_CHARACTERISTIC(NAME, "冷氣"),
-                HOMEKIT_CHARACTERISTIC(MANUFACTURER, "Swift"),
-                HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "20190721"),
-                HOMEKIT_CHARACTERISTIC(MODEL, "SWF-08C"),
-                HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "0.0.11"),
+                HOMEKIT_CHARACTERISTIC(NAME, "AC"),
+                HOMEKIT_CHARACTERISTIC(MANUFACTURER, "台灣三洋 SANYO"),
+                HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "20190920"),
+                HOMEKIT_CHARACTERISTIC(MODEL, "RL-900"),
+                HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "0.0.1"),
                 HOMEKIT_CHARACTERISTIC(IDENTIFY, ac_identify), NULL}),
           HOMEKIT_SERVICE(HEATER_COOLER, .primary = true,
                           .characteristics =
@@ -73,36 +63,18 @@ homekit_accessory_t *homekit_accessories[] = {
                               &current_temperature, &target_temperature,
                               &current_heater_cooler_state,
                               &target_heater_cooler_state, &units,
-                              &ac_rotation_speed, &ac_swing_mode, NULL}),
-          HOMEKIT_SERVICE(
+                              &ac_rotation_speed, NULL}),
+          /*HOMEKIT_SERVICE(
             HUMIDITY_SENSOR,
             .characteristics =
               (homekit_characteristic_t *[]){
                 HOMEKIT_CHARACTERISTIC(NAME, "濕度"), &current_humidity,
-                HOMEKIT_CHARACTERISTIC(ACTIVE, 1), NULL}),
-          NULL}),
-  HOMEKIT_ACCESSORY(
-      .id = 2, .category = homekit_accessory_category_fan,
-      .services =
-        (homekit_service_t *[]){
-          HOMEKIT_SERVICE(
-            ACCESSORY_INFORMATION,
-            .characteristics =
-              (homekit_characteristic_t *[]){
-                HOMEKIT_CHARACTERISTIC(NAME, "電風扇"),
-                HOMEKIT_CHARACTERISTIC(MANUFACTURER, "Y.S. TECH"),
-                HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "20190721"),
-                HOMEKIT_CHARACTERISTIC(MODEL, "YS-9166SFR"),
-                HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "0.0.1"),
-                HOMEKIT_CHARACTERISTIC(IDENTIFY, ac_identify), NULL}),
-          HOMEKIT_SERVICE(FAN2, .primary = true,
-                          .characteristics =
-                            (homekit_characteristic_t *[]){
-                              HOMEKIT_CHARACTERISTIC(NAME, "電風扇"),
-                              &fan_active, &fan_rotation_speed, NULL}),
+                HOMEKIT_CHARACTERISTIC(ACTIVE, 1), NULL}),*/
           NULL}),
   NULL};
 ;
 homekit_server_config_t homekit_config = {.accessories = homekit_accessories,
                                           .password = HOMEKIT_PASSWORD,
                                           .on_event = on_homekit_event};
+
+EventGroupHandle_t sync_flags;

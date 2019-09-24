@@ -1,4 +1,4 @@
-PROGRAM = esp-homekit-cooler-fan
+PROGRAM = esp-homekit-yuniko-ac
 PROGRAM_SRC_DIR = src
 
 EXTRA_COMPONENTS = \

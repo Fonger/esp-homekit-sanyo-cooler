@@ -10,6 +10,7 @@
 #include <homekit/characteristics.h>
 #include <homekit/homekit.h>
 #include <stdio.h>
+#include <sysparam.h>
 #include <task.h>
 
 #include "homekit_callback.h"
@@ -47,8 +48,11 @@ void init() {
   led_init();
   ir_init();
 
-  xTaskCreate(temperature_sensor_task, "TempSensor", 256, NULL, 2, NULL);
-  xTaskCreate(ir_dump_task, "IR dump", 4096, NULL, tskIDLE_PRIORITY, NULL);
+  xTaskCreate(temperature_sensor_task, "TempSensor", 256, NULL,
+              tskIDLE_PRIORITY, NULL);
+  xTaskCreate(ir_decode_task, "IRDecodeTask", 2048, NULL, tskIDLE_PRIORITY,
+              NULL);
+  // xTaskCreate(ir_dump_task, "IR dump", 4096, NULL, tskIDLE_PRIORITY, NULL);
 
   homekit_initialized = true;
 }
@@ -59,8 +63,13 @@ void led_init() {
 }
 
 void user_init(void) {
+  gpio_enable(14, GPIO_OUTPUT);
+  gpio_set_pullup(14, false, false);
+  gpio_write(14, false);
+
   uart_set_baud(0, 115200);
 
+  sysparam_set_string("hostname", "Yuniko-Homekit");
   wifi_init();
   homekit_server_init(&homekit_config);
 

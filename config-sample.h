@@ -1,13 +1,17 @@
-#define WIFI_SSID "wifi ap name"
-#define WIFI_PASS "wifi password"
+#pragma once
 
-#define HOMEKIT_PASSWORD "111-11-111"
+#define WIFI_SSID "WIFI NAME"
+#define WIFI_PASS "WIFI PASSWORD"
 
-#define DEFAULT_COOLER_TEMPERATURE 27
-#define MIN_COOLER_TEMPERATURE 16
-#define MAX_COOLER_TEMPERATURE 32
+#define HOSTNAME "Yuniko-Homekit-AC"
+#define HOMEKIT_PASSWORD "123-45-678"
 
-#define TEMPERATURE_POLL_PERIOD 10000
+#define DEFAULT_COOLER_TEMPERATURE 22
+#define MIN_COOLER_TEMPERATURE 15
+#define MAX_COOLER_TEMPERATURE 30
+
+#define TEMPERATURE_POLL_PERIOD 5000
 #define TEMPERATURE_SENSOR_GPIO 4 // D2
 #define LED_GPIO 2                // D4
-#define IR_RX_GPIO 12             // D6
+#define IR_TX_GPIO 14             // D5 fixed
+#define IR_RX_GPIO 5              // D1
